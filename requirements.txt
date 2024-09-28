@@ -1,6 +1,7 @@
 chainlit
 llama_index
 llama-index-core
+llama-index-tools-tavily-research
 llama-index-llms-gemini
 llama-index-llms-openai
 llama-index-llms-groq
