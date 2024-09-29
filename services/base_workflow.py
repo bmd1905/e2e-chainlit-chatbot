@@ -6,6 +6,7 @@ from llama_index.llms.gemini import Gemini
 from llama_index.llms.groq import Groq
 from llama_index.llms.openai import OpenAI
 
+# Available models
 available_models = [
     "llama-3.1-70b-versatile",
     "gpt-4o",
@@ -21,12 +22,21 @@ class WorkflowABCMeta(type(Workflow), ABCMeta):
 
 
 class BaseWorkflow(Workflow, ABC, metaclass=WorkflowABCMeta):
+    """
+    Base workflow class.
+    """
+
     def __init__(self, timeout: int = 60, verbose: bool = True):
+        """
+        Initialize the BaseWorkflow.
+        """
         super().__init__(timeout=timeout, verbose=verbose)
         self.llm = None  # Initialize llm as None
 
     def set_model(self, model: str):
-        # Update the LLM based on the model name
+        """
+        Set the model based on the model name.
+        """
         model_mapping: Dict[str, Type] = {
             "llama-3.1-70b-versatile": Groq,
             "llama-3.1-8b-instant": Groq,
@@ -48,5 +58,8 @@ class BaseWorkflow(Workflow, ABC, metaclass=WorkflowABCMeta):
         history: List[Dict[str, str]] = None,
         model: str = "llama-3.1-70b-versatile",
     ) -> str:
+        """
+        Execute the request workflow.
+        """
         self.set_model(model)  # Set the model before executing the workflow
         pass

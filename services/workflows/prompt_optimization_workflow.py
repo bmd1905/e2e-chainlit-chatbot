@@ -1,6 +1,5 @@
-import asyncio
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import chainlit as cl
 from llama_index.core.llms import ChatMessage
@@ -11,6 +10,7 @@ from pydantic import BaseModel
 
 from .. import logger
 from ..base_workflow import BaseWorkflow
+from ..utils import store_history_in_memory  # Import the new utility function
 
 
 class MessageRole(Enum):
@@ -125,18 +125,7 @@ class PromptOptimizationWorkflow(BaseWorkflow):
         self.set_model(model)  # Set the model before executing the workflow
         try:
             # Convert history to ChatMessage objects and add to memory
-            if history:
-                for message in history:
-                    role = message.get("role", "").upper()
-                    if role == "USER":
-                        role = MessageRole.HUMAN
-                    elif role == "ASSISTANT":
-                        role = MessageRole.ASSISTANT
-                    else:
-                        role = MessageRole.SYSTEM
-                    self.memory.put(
-                        ChatMessage(role=role, content=message.get("content", ""))
-                    )
+            store_history_in_memory(history, self.memory)
 
             # Add the current user input to memory
             self.memory.put(ChatMessage(role=MessageRole.HUMAN, content=user_input))
@@ -170,35 +159,3 @@ class PromptOptimizationWorkflow(BaseWorkflow):
         except Exception as e:
             logger.error(f"Error processing request: {str(e)}")
             return "I apologize, but I encountered an error while processing your request. Please try again later."
-
-
-async def main():
-    # Initialize the workflow
-    chatbot_workflow = PromptOptimizationWorkflow(timeout=60, verbose=True)
-
-    # Example user prompt
-    user_prompt = "MLOps?"
-
-    # Example conversation history
-    conversation_history: Optional[List[Dict[str, str]]] = [
-        {"role": "user", "content": "Hi, I need help with machine learning."},
-        {
-            "role": "assistant",
-            "content": "Sure, I'd be happy to help you with Machine Learning.",
-        },
-    ]
-
-    logger.info(f"User: {user_prompt}")
-
-    # Run the workflow with history
-    final_response = await chatbot_workflow.execute_request_workflow(
-        user_input=user_prompt,
-        history=conversation_history,
-    )
-
-    # Print the chatbot's response
-    print(f"Chatbot: {final_response}")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

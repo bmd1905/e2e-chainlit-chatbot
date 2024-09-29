@@ -6,8 +6,15 @@ from .base_workflow import BaseWorkflow
 
 
 class WorkflowFactory:
+    """
+    Workflow factory.
+    """
+
     @staticmethod
     def create_workflow(workflow_type: str, **kwargs) -> BaseWorkflow:
+        """
+        Create a workflow based on the workflow type.
+        """
         if workflow_type == "prompt_optimization":
             return PromptOptimizationWorkflow(**kwargs)
         elif workflow_type == "multi_step_agent":

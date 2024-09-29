@@ -4,6 +4,10 @@ from .workflow_factory import WorkflowFactory
 
 
 class ChatbotService:
+    """
+    Chatbot service.
+    """
+
     def __init__(self):
         self.workflow_factory = WorkflowFactory()
 
@@ -14,5 +18,8 @@ class ChatbotService:
         history: List[Dict[str, str]] = None,
         model: str = "llama-3.1-70b-versatile",
     ) -> str:
+        """
+        Process the request.
+        """
         workflow = self.workflow_factory.create_workflow(workflow_type)
         return await workflow.execute_request_workflow(user_input, history, model)

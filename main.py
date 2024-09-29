@@ -5,13 +5,25 @@ from services.chatbot_service import ChatbotService
 
 @cl.on_chat_start
 async def on_chat_start():
+    """
+    On chat start.
+    """
+    # Create the chatbot service
     app = ChatbotService()
+
+    # Set the chatbot service in the user session
     cl.user_session.set("app", app)
+
+    # Send a welcome message to the user
     await cl.Message("Hello! Ask me anything!").send()
 
 
 @cl.on_message
 async def on_message(message: cl.Message):
+    """
+    On message.
+    """
+    # Get the app from the user session
     app = cl.user_session.get("app")
 
     # Start a parent step
