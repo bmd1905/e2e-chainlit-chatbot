@@ -1,3 +1,5 @@
+from typing import Dict, Optional
+
 import chainlit as cl
 from chainlit.input_widget import Select, Slider, Switch
 
@@ -9,6 +11,16 @@ workflow_mapping = {
     "Multi-Step Agent": "multi_step_agent",
     "Prompt Optimization": "prompt_optimization",
 }
+
+
+@cl.oauth_callback
+def oauth_callback(
+    provider_id: str,
+    token: str,
+    raw_user_data: Dict[str, str],
+    default_user: cl.User,
+) -> Optional[cl.User]:
+    return default_user
 
 
 @cl.set_chat_profiles
@@ -61,7 +73,7 @@ async def on_chat_start():
                 id="Model",
                 label="OpenAI - Model",
                 values=list(model_mapping.keys()),
-                initial_index=0,
+                initial_value="llama-3.1-70b-versatile",
             ),
             Switch(id="Streaming", label="OpenAI - Stream Tokens", initial=True),
             Slider(
