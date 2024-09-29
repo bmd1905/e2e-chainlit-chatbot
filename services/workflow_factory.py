@@ -8,11 +8,11 @@ from .base_workflow import BaseWorkflow
 class WorkflowFactory:
     @staticmethod
     def create_workflow(workflow_type: str, **kwargs) -> BaseWorkflow:
-        if workflow_type == "prompt_optim":
+        if workflow_type == "prompt_optimization":
             return PromptOptimizationWorkflow(**kwargs)
-        elif workflow_type == "multi_step":
+        elif workflow_type == "multi_step_agent":
             return MultiStepAgentWorkflow(**kwargs)
-        elif workflow_type == "simple":
+        elif workflow_type == "simple_chatbot":
             return SimpleChatbotWorkflow(**kwargs)
         else:
             raise ValueError(f"Invalid workflow type: {workflow_type}")

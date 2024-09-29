@@ -3,4 +3,4 @@
 
 
 cl:
-	python3 -m chainlit run app.py -w
+	python3 -m chainlit run main.py -w

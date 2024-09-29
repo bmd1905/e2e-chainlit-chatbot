@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Dict, List
 
+import chainlit as cl
 from llama_index.core.llms import ChatMessage
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.workflow import Event, step
@@ -20,8 +21,13 @@ class SimpleChatbotWorkflow(BaseWorkflow):
         super().__init__(timeout=timeout, verbose=verbose)
         self.memory = ChatMemoryBuffer.from_defaults(token_limit=1024)
 
+    @cl.step(type="llm")
     @step
     async def generate_response(self, event: Event) -> Event:
+        current_step = cl.context.current_step
+
+        current_step.input = event.payload
+
         user_input = event.payload
         chat_history = "\n".join(
             [f"{msg.role.value}: {msg.content}" for msg in self.memory.get()]
@@ -29,6 +35,9 @@ class SimpleChatbotWorkflow(BaseWorkflow):
 
         prompt = f"Given the following conversation history:\n{chat_history}\n\nUser: {user_input}\nAssistant:"
         response = await self.llm.acomplete(prompt)
+
+        current_step.output = str(response).strip()
+
         return Event(payload=str(response).strip())
 
     async def execute_request_workflow(

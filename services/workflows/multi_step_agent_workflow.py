@@ -2,6 +2,7 @@ import asyncio
 from enum import Enum
 from typing import Dict, List
 
+import chainlit as cl
 from llama_index.core.llms import ChatMessage
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.prompts import PromptTemplate
@@ -72,8 +73,13 @@ class MultiStepAgentWorkflow(BaseWorkflow):
         super().__init__(timeout=timeout, verbose=verbose)
         self.memory = ChatMemoryBuffer.from_defaults(token_limit=1024)
 
+    @cl.step(type="llm")
     @step
     async def decompose_task(self, event: Event) -> Event:
+        current_step = cl.context.current_step
+
+        current_step.input = event.payload.user_input
+
         request = event.payload
         response = await self.llm.astructured_predict(
             output_cls=SubtasksOut,
@@ -86,10 +92,17 @@ class MultiStepAgentWorkflow(BaseWorkflow):
             if task.strip()
         ]
         request.subtasks = subtasks
+
+        current_step.output = str(subtasks)
+
         return Event(payload=request)
 
     @step
     async def execute_subtasks(self, event: Event) -> Event:
+        current_step = cl.context.current_step
+
+        current_step.input = event.payload
+
         request = event.payload
 
         async def execute_single_subtask(subtask: Subtask):
@@ -103,10 +116,18 @@ class MultiStepAgentWorkflow(BaseWorkflow):
         await asyncio.gather(
             *(execute_single_subtask(subtask) for subtask in request.subtasks)
         )
+
+        current_step.output = str(request.subtasks)
+
         return Event(payload=request)
 
+    @cl.step(type="llm")
     @step
     async def combine_results(self, event: Event) -> Event:
+        current_step = cl.context.current_step
+
+        current_step.input = event.payload
+
         request = event.payload
         subtask_results = {
             subtask.description: subtask.result for subtask in request.subtasks
@@ -114,14 +135,22 @@ class MultiStepAgentWorkflow(BaseWorkflow):
         response = await self.llm.acomplete(
             self.combination_prompt_template.format(subtask_results=subtask_results)
         )
+
+        current_step.output = str(response)
+
         return Event(
             payload=AgentResponse(
                 final_response=str(response).strip(), subtask_results=subtask_results
             )
         )
 
+    @cl.step(type="llm")
     @step
     async def generate_final_response(self, event: Event) -> Event:
+        current_step = cl.context.current_step
+
+        current_step.input = event.payload
+
         response = event.payload
         final_response = await self.llm.acomplete(
             self.final_response_prompt_template.format(
@@ -129,6 +158,9 @@ class MultiStepAgentWorkflow(BaseWorkflow):
             )
         )
         response.final_response = str(final_response).strip()
+
+        current_step.output = str(response)
+
         return Event(payload=response)
 
     async def execute_request_workflow(
@@ -156,21 +188,9 @@ class MultiStepAgentWorkflow(BaseWorkflow):
             # Add the current user input to memory
             self.memory.put(ChatMessage(role=MessageRole.HUMAN, content=user_input))
 
-            # Get the chat history as a string
-            chat_history = "\n".join(
-                [f"{msg.role.value}: {msg.content}" for msg in self.memory.get()]
-            )
-
-            logger.info(f"Chat History: {chat_history}")
-
-            decomposition_prompt = (
-                f"Given the following conversation history:\n{chat_history}\n\nUser request:"
-                f"{user_input}\n\nBreak down the user request into subtasks."
-            )
-
             # Task Decomposition
             event = await self.decompose_task(
-                Event(payload=AgentRequest(user_input=decomposition_prompt))
+                Event(payload=AgentRequest(user_input=user_input))
             )
             request = event.payload
             logger.info(f"Subtasks: {request.subtasks}")

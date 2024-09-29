@@ -2,6 +2,7 @@ import asyncio
 from enum import Enum
 from typing import Dict, List, Optional
 
+import chainlit as cl
 from llama_index.core.llms import ChatMessage
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.prompts import PromptTemplate
@@ -51,10 +52,15 @@ class PromptOptimizationWorkflow(BaseWorkflow):
         super().__init__(timeout=timeout, verbose=verbose)
         self.memory = ChatMemoryBuffer.from_defaults(token_limit=1024)
 
+    @cl.step(type="llm")
     @step
     async def evaluate_prompt(
         self, event: StartEvent
     ) -> GenerateResponseEvent | OptimizePromptEvent:
+        current_step = cl.context.current_step
+
+        current_step.input = event.user_prompt
+
         # Evaluate the user prompt
         evaluation_response = await self.llm.astructured_predict(
             output_cls=EvaluatePromptOutput,
@@ -62,19 +68,27 @@ class PromptOptimizationWorkflow(BaseWorkflow):
             user_prompt=event.user_prompt,
             history=event.get("history", ""),
         )
+
         needs_optimization = evaluation_response.needs_optimization
 
         logger.info(f"Is optimization needed: {needs_optimization}")
+
+        current_step.output = str(needs_optimization)
 
         if needs_optimization:
             return OptimizePromptEvent(optimized_prompt=event.user_prompt)
 
         return GenerateResponseEvent(final_prompt=event.user_prompt)
 
+    @cl.step(type="llm")
     @step
     async def optimize_prompt(
         self, event: OptimizePromptEvent
     ) -> GenerateResponseEvent:
+        current_step = cl.context.current_step
+
+        current_step.input = event.optimized_prompt
+
         # Optimize the user prompt
         optimization_response = await self.llm.astructured_predict(
             output_cls=OptimizePromptOutput,
@@ -86,13 +100,22 @@ class PromptOptimizationWorkflow(BaseWorkflow):
 
         logger.info(f"Optimized Prompt: {optimized_prompt}")
 
+        current_step.output = optimized_prompt
+
         return GenerateResponseEvent(final_prompt=optimized_prompt)
 
+    @cl.step(type="llm")
     @step
     async def generate_response(self, event: GenerateResponseEvent) -> StopEvent:
+        current_step = cl.context.current_step
+
+        current_step.input = event.final_prompt
+
         # Generate the chatbot's response
         response_prompt = f"Chatbot response to: {event.final_prompt}"
         chatbot_response = await self.llm.acomplete(response_prompt)
+
+        current_step.output = str(chatbot_response).strip()
         return StopEvent(result=str(chatbot_response).strip())
 
     async def execute_request_workflow(
