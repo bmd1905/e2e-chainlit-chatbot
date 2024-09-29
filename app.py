@@ -1,5 +1,5 @@
 import os
-from typing import Annotated, Any, List, Optional
+from typing import Annotated, Any, List, Optional, Dict
 
 import chainlit as cl
 from llama_index.core.agent import FunctionCallingAgentWorker
@@ -64,7 +64,7 @@ class MixtureOfAnswers(Workflow):
         self.answer_without_search_engine = SimpleChatEngine.from_defaults(llm=self.llm)
         self.history: List[ChatMessage] = []
 
-    # @cl.step(type="llm")
+    @cl.step(type="llm")
     @step()
     async def route_to_llm(self, ev: StartEvent) -> SearchEvent | AnswerEvent:
         """Generates a search event and an answer event once given a start event"""
@@ -121,7 +121,7 @@ class MixtureOfAnswers(Workflow):
 
         return ResponseEvent(query=ev.query, answer=str(response))
 
-    # @cl.step(type="llm")
+    @cl.step(type="llm")
     @step()
     async def compile(self, ctx: Context, ev: ResponseEvent) -> StopEvent:
         """Compiles and summarizes answers from all response events"""
@@ -158,6 +158,37 @@ class MixtureOfAnswers(Workflow):
 
         return StopEvent(result=str(response))
 
+    async def execute_request_workflow(
+        self, user_input: str, history: List[Dict[str, str]] = None
+    ) -> str:
+        """Executes the workflow based on user input and conversation history."""
+        try:
+            # Convert history to ChatMessage objects and add to memory
+            if history:
+                for message in history:
+                    role = message.get("role", "").upper()
+                    if role == "USER":
+                        role = MessageRole.USER
+                    elif role == "ASSISTANT":
+                        role = MessageRole.ASSISTANT
+                    else:
+                        role = MessageRole.SYSTEM
+                    self.history.append(
+                        ChatMessage(role=role, content=message.get("content", ""))
+                    )
+
+            # Add the current user input to history
+            self.history.append(ChatMessage(role=MessageRole.USER, content=user_input))
+
+            # Run the app logic
+            result = await self.run(query=user_input)
+
+            return result
+
+        except Exception as e:
+            # Handle exceptions
+            return f"Error processing request: {str(e)}"
+
 
 ### Define the app - with just a few lines of code
 @cl.on_chat_start
@@ -172,5 +203,16 @@ async def on_chat_start():
 @cl.on_message
 async def on_message(message: cl.Message):
     app = cl.user_session.get("app")
-    result = await app.run(query=message.content)
-    await cl.Message(content=result).send()
+
+    # Start a parent step
+    async with cl.Step(name="Processing Query") as parent_step:
+        parent_step.input = message.content
+
+        # Run the execute_request_workflow logic
+        result = await app.execute_request_workflow(user_input=message.content)
+
+        # Set the output of the parent step
+        parent_step.output = result
+
+    # Send the final result back to the user
+    await cl.Message(content=parent_step.output).send()
