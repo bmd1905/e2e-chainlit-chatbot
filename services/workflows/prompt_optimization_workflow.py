@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Dict, List
 
 import chainlit as cl
@@ -10,13 +9,8 @@ from pydantic import BaseModel
 
 from .. import logger
 from ..base_workflow import BaseWorkflow
-from ..utils import store_history_in_memory  # Import the new utility function
-
-
-class MessageRole(Enum):
-    HUMAN = "user"
-    ASSISTANT = "assistant"
-    SYSTEM = "system"
+from ..schema import MessageRole
+from ..utils import store_history_in_memory
 
 
 class OptimizePromptEvent(Event):

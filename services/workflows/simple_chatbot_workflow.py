@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Dict, List
 
 import chainlit as cl
@@ -8,17 +7,8 @@ from llama_index.core.workflow import Event, step
 
 from .. import logger
 from ..base_workflow import BaseWorkflow
+from ..schema import MessageRole
 from ..utils import store_history_in_memory
-
-
-class MessageRole(Enum):
-    """
-    Enum for the role of the message.
-    """
-
-    HUMAN = "user"
-    ASSISTANT = "assistant"
-    SYSTEM = "system"
 
 
 class SimpleChatbotWorkflow(BaseWorkflow):

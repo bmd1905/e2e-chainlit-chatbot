@@ -1,0 +1,8 @@
+---
+models:
+  gpt-4o: llama_index.llms.openai.OpenAI
+  gpt-4o-mini: llama_index.llms.openai.OpenAI
+  llama-3.1-70b-versatile: llama_index.llms.groq.Groq
+  llama-3.1-8b-instant: llama_index.llms.groq.Groq
+  models/gemini-1.5-flash: llama_index.llms.gemini.Gemini
+  models/gemini-1.5-pro: llama_index.llms.gemini.Gemini

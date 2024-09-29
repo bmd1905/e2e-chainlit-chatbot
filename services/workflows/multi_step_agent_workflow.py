@@ -1,5 +1,4 @@
 import asyncio
-from enum import Enum
 from typing import Dict, List
 
 import chainlit as cl
@@ -11,17 +10,8 @@ from pydantic import BaseModel, Field
 
 from .. import logger
 from ..base_workflow import BaseWorkflow
+from ..schema import MessageRole
 from ..utils import store_history_in_memory
-
-
-class MessageRole(Enum):
-    """
-    Enum for the role of the message.
-    """
-
-    HUMAN = "user"
-    ASSISTANT = "assistant"
-    SYSTEM = "system"
 
 
 class Subtask(BaseModel):

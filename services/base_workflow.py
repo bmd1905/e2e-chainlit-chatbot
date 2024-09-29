@@ -1,19 +1,9 @@
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Dict, List, Type
+from typing import Dict, List
 
 from llama_index.core.workflow import Workflow
-from llama_index.llms.gemini import Gemini
-from llama_index.llms.groq import Groq
-from llama_index.llms.openai import OpenAI
 
-# Available models
-available_models = [
-    "llama-3.1-70b-versatile",
-    "gpt-4o",
-    "gpt-4o-mini",
-    "models/gemini-1.5-pro",
-    "models/gemini-1.5-flash",
-]
+from .utils import model_mapping
 
 
 # Create a custom metaclass that combines WorkflowMeta and ABCMeta
@@ -37,17 +27,12 @@ class BaseWorkflow(Workflow, ABC, metaclass=WorkflowABCMeta):
         """
         Set the model based on the model name.
         """
-        model_mapping: Dict[str, Type] = {
-            "llama-3.1-70b-versatile": Groq,
-            "llama-3.1-8b-instant": Groq,
-            "gpt-4o": OpenAI,
-            "gpt-4o-mini": OpenAI,
-            "models/gemini-1.5-pro": Gemini,
-            "models/gemini-1.5-flash": Gemini,
-        }
-
         if model in model_mapping:
-            self.llm = model_mapping[model](model=model)
+            model_class_path = model_mapping[model]
+            module_name, class_name = model_class_path.rsplit(".", 1)
+            module = __import__(module_name, fromlist=[class_name])
+            model_class = getattr(module, class_name)
+            self.llm = model_class(model=model)
         else:
             raise ValueError(f"Unsupported model: {model}")
 

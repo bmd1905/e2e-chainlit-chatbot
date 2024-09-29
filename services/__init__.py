@@ -49,9 +49,6 @@ def init_logging(env: str = "development") -> None:
         enqueue=True,  # Enables asynchronous logging
     )
 
-    # Optional: Add custom level
-    logger.level("REQUEST", no=25, color="<yellow>", icon=" ")
-
     # Catch all unhandled exceptions and log them
     def exception_handler(exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
