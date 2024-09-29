@@ -8,6 +8,8 @@ This application manages various chatbot services using Chainlit and LlamaIndex.
 - **Prompt optimization**: Automatically optimizes user prompts for better responses, enhancing the overall user experience.
 - **Chat history management**: Maintains a history of interactions for context-aware responses, ensuring continuity in conversations.
 - **Customizable models**: Easily switch between different LLM models to tailor the chatbot's behavior to specific needs.
+- **Web Search**: Integrates a web search capability using the Tavily search tool to provide real-time answers based on user queries.
+- **Authentication**: Supports user authentication via GitHub and Google, allowing for secure access to the chatbot services.
 
 ## Setup
 
@@ -16,13 +18,18 @@ To set up the project, follow these steps:
 1. **Clone the repository**:
 
 ```bash
-git clone https://github.com/bmd1905/chainlit.git
-cd chainlit
+git clone https://github.com/bmd1905/e2e-chainlit-chatbot.git
+cd e2e-chainlit-chatbot
 ```
 
 2. **Install the required dependencies**:
 
 ```bash
+# Create and activate environment
+conda create -n e2e-chainlit-chatbot python=3.11 -y
+conda activate e2e-chainlit-chatbot
+
+# Install libraries
 pip install -r requirements.txt
 ```
 
@@ -36,11 +43,11 @@ pre-commit install
 You can start the chatbot service using the following command:
 
 ```bash
-python main.py
+make cl
 ```
 
 5. **Access the chatbot**:
-Open your browser and navigate to `http://localhost:3000` to interact with your chatbot.
+Open your browser and navigate to `http://localhost:8000` to interact with your chatbot.
 
 ## Usage
 
