@@ -1,4 +1,4 @@
-# Chainlit Chatbot Service
+# E2E Chainlit Chatbot
 
 This application manages various chatbot services using Chainlit and LlamaIndex. It provides a flexible framework for building and deploying chatbots with advanced capabilities.
 
