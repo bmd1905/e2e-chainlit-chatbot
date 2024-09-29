@@ -10,6 +10,7 @@ workflow_mapping = {
     "Simple Chatbot": "simple_chatbot",
     "Multi-Step Agent": "multi_step_agent",
     "Prompt Optimization": "prompt_optimization",
+    "Web Search": "web_search",
 }
 
 
@@ -43,6 +44,11 @@ async def chat_profile():
             name="Prompt Optimization",
             markdown_description="This is a prompt optimization workflow that can optimize prompts.",
             # icon="./assets/agent_types/sparkle.png",
+        ),
+        cl.ChatProfile(
+            name="Web Search",
+            markdown_description="This is a web search agent that can search the internet for answers.",
+            # icon="./assets/agent_types/search.png",
         ),
     ]
 
