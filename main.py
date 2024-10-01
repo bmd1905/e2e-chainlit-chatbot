@@ -4,7 +4,7 @@ import chainlit as cl
 from chainlit.input_widget import Select, Slider, Switch
 
 from services.chatbot_service import ChatbotService
-from services.utils import model_mapping
+from services.utils import model_list
 
 workflow_mapping = {
     "Simple Chatbot": "simple_chatbot",
@@ -78,8 +78,10 @@ async def on_chat_start():
             Select(
                 id="Model",
                 label="OpenAI - Model",
-                values=list(model_mapping.keys()),
-                initial_value="llama-3.1-70b-versatile",
+                values=list(model_list),
+                initial_value="llama-3.1-70b"
+                if "llama-3.1-70b" in model_list
+                else model_list[0],
             ),
             Switch(id="Streaming", label="OpenAI - Stream Tokens", initial=True),
             Slider(
@@ -93,7 +95,14 @@ async def on_chat_start():
         ]
     ).send()
 
-    cl.user_session.set("settings", settings)
+    # Update the model variable in the user session
+    cl.user_session.set("model", settings.get("Model"))
+
+
+# This receives updates in settings
+@cl.on_settings_update
+async def update_model(settings):
+    cl.user_session.set("model", settings["Model"])
 
 
 @cl.on_message
@@ -112,7 +121,6 @@ async def on_message(message: cl.Message):
         result = await app.process_request(
             user_input=message.content,
             workflow_type=cl.user_session.get("workflow_type"),
-            model=cl.user_session.get("settings").get("Model"),
         )
 
         # Set the output of the parent step

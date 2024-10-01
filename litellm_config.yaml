@@ -1,0 +1,39 @@
+model_list:
+  # - model_name: gpt-4o
+  #   litellm_params:
+  #     model: openai/gpt-4o
+  #     api_key: os.environ/OPENAI_API_KEY
+
+  # - model_name: gpt-4o-mini
+  #   litellm_params:
+  #     model: openai/gpt-4o-mini
+  #     api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: gemini/gemini-1.5-flash
+    litellm_params:
+      model: gemini/gemini-1.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+      rpm: 50
+
+  - model_name: groq/llama-3.1-70b-versatile
+    litellm_params:
+      model: groq/llama-3.1-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+
+  - model_name: groq/llama-3.1-8b-instant
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+
+litellm_settings:
+  num_retries: 1
+  request_timeout: 15 # raise Timeout error if call takes longer than 15s. Sets litellm.request_timeout
+  allowed_fails: 3 # cooldown model if it fails > 1 call in a minute.
+  cooldown_time: 30 # how long to cooldown model if fails/min > allowed_fails
+  # success_callback: ["supabase"]
+  # failure_callback: ["supabase"]
+  drop_params: True
+  set_verbose: False
+  cache: False

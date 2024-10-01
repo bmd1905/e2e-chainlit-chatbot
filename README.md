@@ -39,8 +39,14 @@ pip install -r requirements.txt
 pre-commit install
 ```
 
-4. **Run the application**:
-You can start the chatbot service using the following command:
+## Usage
+Start LiteLLM proxy server with the following command:
+
+```bash
+make litellm
+```
+
+Then you can start the chatbot service using the following command:
 
 ```bash
 make cl
