@@ -2,6 +2,8 @@
 
 This application manages various chatbot services using Chainlit and LlamaIndex. It provides a flexible framework for building and deploying chatbots with advanced capabilities.
 
+https://github.com/user-attachments/assets/14b418b9-c825-4c1d-9548-544077525e70
+
 ## Table of Contents
 - [Features](#features)
 - [Setup](#setup)
