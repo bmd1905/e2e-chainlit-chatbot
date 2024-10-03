@@ -44,11 +44,40 @@ To set up the project, follow these steps:
     pip install -r requirements.txt
     ```
 
-3. **Install pre-commit dependencies**:
+3. **External API Keys**
 
-    ```bash
-    pre-commit install
-    ```
+Please follow `.env.example` to create `.env` file and add the following keys:
+
+```bash
+cp .env.example .env
+```
+
+Then add the following keys:
+
+- **OpenAI API Key**: `OPENAI_API_KEY`, https://platform.openai.com/api-keys
+- **Gemini API Key**: `GEMINI_API_KEY`, https://aistudio.google.com/app/apikey
+- **Groq API Key**: `GROQ_API_KEY`, https://console.groq.com/keys
+- **Tavily API Key**: `TAVILY`, https://app.tavily.com/home
+
+4. **Chainlit Configuration**
+
+Please run `chainlit create-secret` to create a secret for your application, then put the secret in `.env` file as `CHAINLIT_AUTH_SECRET`.
+
+5. **LiteLLM Configuration**
+
+Open the `litellm_config.yaml` file and set the `api_key` for the models you want to use. In case you don't have the api key, just comment it out.
+
+If you want to use other models, you can add them to the `litellm_config.yaml` file (make sure to add the api key in the `.env` file). Here is the [link](https://docs.litellm.ai/docs/providers) for the model list.
+
+6. **Literal AI Configuration (Optional but Easy)**
+
+Go to the [Literal AI](https://literalai.com/) and create an account. Then create a new project and get the api key. Put the api key in the `.env` file as `LITERAL_API_KEY`.
+
+7. **OAuth Configuration (Optional but Complex)**
+
+Please follow the [link](https://docs.chainlit.io/authentication/overview) to set up the OAuth configuration.
+
+
 
 ## Usage
 
